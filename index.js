@@ -18,20 +18,20 @@ function searchMeal(e){
 
     // check for empty
     if(term.trim()){
-        fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${term}`)
+        fetch(`https://themealdb-service.herokuapp.com/menu?meal=${term}`)
         .then(res => res.json())
         .then(data => {
-            console.log(data);
+            let meals = data;
             resultHeading.innerHTML = `<h2> Resultados da pesquisa para '${term}':</h2>`;
 
-            if(data.meals === null){
+            if(meals === null){
                 resultHeading.innerHTML = `<p>Não há resultados de pesquisa. Tente novamente</p>`;
             }else{
-                mealsEl.innerHTML = data.meals.map(meal => `
+                mealsEl.innerHTML = meals.map(meal => `
                     <div class="meal">
-                        <img src="${meal.strMealThumb}" alt="${meal.strMeal}"/>
-                        <div class="meal-info" data-mealID="${meal.idMeal}">
-                            <h3>${meal.strMeal}</h3>
+                        <img src="${meal.mealThumb}" alt="${meal.meal}"/>
+                        <div class="meal-info" data-mealID="${meal.id}">
+                            <h3>${meal.meal}</h3>
                         </div>
                     </div>
                 `)
@@ -47,7 +47,8 @@ function searchMeal(e){
 
     // Fetch meal by ID
     function getMealById(mealID){
-        fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${mealID}`)
+        
+        fetch(`https://themealdb-service.herokuapp.com/menu/meal/${mealID}`)
         .then(res => res.json())
         .then(data => {
             const meal = data.meals[0];
@@ -62,7 +63,7 @@ function searchMeal(e){
         mealsEl.innerHTML = '';
         resultHeading.innerHTML = '';
 
-        fetch(`https://www.themealdb.com/api/json/v1/1/random.php`)
+        fetch(`https://themealdb-service.herokuapp.com/menu/meal/random`)
         .then(res => res.json())
         .then(data =>{
             const meal = data.meals[0];
@@ -74,25 +75,21 @@ function searchMeal(e){
     // Add meal to DOM
     function addMealToDOM(meal){
         const ingredients = [];
-
-        for(let i =1; i <= 20; i++){
-            if(meal[`strIngredient${i}`]){
-                ingredients.push(`${meal[`strIngredient${i}`]} - ${meal[`strMeasure${i}`]}`);
-            } else{
-                break;
-            }
+        console.log(meal)
+        for(let i = 0; i <= meal.ingredients.lenght; i++){
+            ingredients.push(`${meal.ingredients[i]} - ${meal.measures[i]}`);
         }
 
         single_mealEl.innerHTML = `
         <div class="single-meal">
-            <h1>${meal.strMeal}</h1>
-            <img src="${meal.strMealThumb}" alt="${meal.strMeal}"/>
+            <h1>${meal.meal}</h1>
+            <img src="${meal.mealThumb}" alt="${meal.meal}"/>
             <div class="single-meal-info">
-                ${meal.strCategory ? `<p>${meal.strCategory}</p>` : ''}
-                ${meal.strArea ? `<p>${meal.strArea}</p>` : ''}
+                ${meal.category ? `<p>${meal.category}</p>` : ''}
+                ${meal.area ? `<p>${meal.area}</p>` : ''}
             </div>
             <div class="main">
-                <p>${meal.strInstructions}</p>
+                <p>${meal.instructions}</p>
                 <h2>Ingredientes</h2>
                 <ul>
                     ${ingredients.map(ing => `<li>${ing}</li>`).join('')}
